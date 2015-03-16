@@ -1,0 +1,7 @@
+%{"cowboy": {:hex, :cowboy, "1.0.0"},
+  "cowboy_revproxy": {:git, "git://github.com/benoitc/cowboy_revproxy.git", "5e9d0c06d135dff1903994fded1d800e01ee909b", []},
+  "cowlib": {:hex, :cowlib, "1.0.1"},
+  "hackney": {:hex, :hackney, "0.14.1"},
+  "idna": {:hex, :idna, "1.0.1"},
+  "plug": {:hex, :plug, "0.8.1"},
+  "ranch": {:hex, :ranch, "1.0.0"}}
