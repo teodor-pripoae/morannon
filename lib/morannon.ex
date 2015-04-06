@@ -2,10 +2,7 @@ defmodule Morannon do
   use Plug.Builder
   import Plug.Conn
 
-  #@target "http://localhost:5555"
-  @target "http://127.0.0.1:5555"
-
-  plug Plug.Logger
+  #plug Plug.Logger
   plug :dispatch
 
   def start(_argv) do
@@ -17,7 +14,7 @@ defmodule Morannon do
   def dispatch(conn, _opts) do
     # Start a request to the client saying we will stream the body.
     # We are simply passing all req_headers forward.
-    IO.puts(inspect(conn.req_headers))
+    #IO.puts(inspect(conn.req_headers))
     {:ok, client} = :hackney.request(:get, uri(conn), conn.req_headers, :stream, [])
 
     conn
@@ -56,10 +53,14 @@ defmodule Morannon do
   end
 
   defp uri(conn) do
-    base = @target <> "/" <> Enum.join(conn.path_info, "/")
+    base = target <> "/" <> Enum.join(conn.path_info, "/")
     case conn.query_string do
       "" -> base
       qs -> base <> "?" <> qs
     end
+  end
+
+  def target do
+    Application.get_env(:proxy, :upstream).address
   end
 end
