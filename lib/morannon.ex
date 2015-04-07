@@ -6,6 +6,7 @@ defmodule Morannon do
 
   plug Plug.Session, Application.get_env(:proxy, :session)
   plug :fetch_cookies
+  plug TestPlug
   plug :fetch_session
   plug :dispatch
 
