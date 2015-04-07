@@ -3,23 +3,30 @@ defmodule Morannon do
   import Plug.Conn
 
   #plug Plug.Logger
+
+  plug Plug.Session, Application.get_env(:proxy, :session)
+  plug :fetch_cookies
+  plug :fetch_session
   plug :dispatch
 
   def start(_argv) do
     IO.puts "Running Proxy with Cowboy on http://localhost:4000"
-    Plug.Adapters.Cowboy.http __MODULE__, port: 4000
+    Plug.Adapters.Cowboy.http __MODULE__, [], port: 4000, acceptors: 100
     :timer.sleep(:infinity)
   end
 
   def dispatch(conn, _opts) do
     # Start a request to the client saying we will stream the body.
     # We are simply passing all req_headers forward.
-    #IO.puts(inspect(conn.req_headers))
-    {:ok, client} = :hackney.request(:get, uri(conn), conn.req_headers, :stream, [])
+    if session(conn)[:user_token] do
+      {:ok, client} = :hackney.request(:get, uri(conn), conn.req_headers, :stream, [])
 
-    conn
-    |> write_proxy(client)
-    |> read_proxy(client)
+      conn
+      |> write_proxy(client)
+      |> read_proxy(client)
+    else
+      Plug.Conn.send_resp(conn, 200, "unauthorized")
+    end
   end
 
   # Reads the connection body and write it to the
@@ -62,5 +69,9 @@ defmodule Morannon do
 
   def target do
     Application.get_env(:proxy, :upstream).address
+  end
+
+  def session(conn) do
+    Map.get(conn.private, :plug_session)
   end
 end
